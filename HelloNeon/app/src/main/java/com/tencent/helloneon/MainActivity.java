@@ -3,6 +3,7 @@ package com.tencent.helloneon;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,7 +14,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.hello).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makeTest();
+                makeTest(new BenchListener() {
+                    @Override
+                    public void onResult(String res) {
+                        TextView tv = (TextView)findViewById(R.id.hello);
+                        tv.setText(res);
+                    }
+                });
             }
         });
     }
@@ -22,5 +29,5 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("neon");
     }
 
-    public static native void makeTest();
+    public static native void makeTest(BenchListener listener);
 }

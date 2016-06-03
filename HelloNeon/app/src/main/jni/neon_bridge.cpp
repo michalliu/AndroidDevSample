@@ -2,17 +2,22 @@
 #include <arm_neon.h>
 #include <android/log.h>
 #include <malloc.h>
-
+#include <sys/time.h>
+#include <time.h>
+#include <string>
+#include <sstream>
 
 const int DATA_SIZE = 1920*1080;
 
-void test() {
+void test(JNIEnv * env, jobject jRoot, jobject jObj) {
     int *testSet1 = (int*)malloc(sizeof(int)*DATA_SIZE);
 
     for(uint32_t i = 0; i<DATA_SIZE; i++) {
         testSet1[i] = i;
     }
 
+
+    clock_t begin = clock();
 
     for (uint32_t i=0; i<DATA_SIZE/4/2; i++) {
         int32_t *src = testSet1+i*4;
@@ -24,13 +29,34 @@ void test() {
         vst1q_s32(dest, tmp);
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, "NEON", "last number is %d", testSet1[DATA_SIZE-1]);
+    clock_t end = clock();
+
+    for (uint32_t i = 0; i<DATA_SIZE/2; i++) {
+        int t = testSet1[i];
+        int d = testSet1[DATA_SIZE-1-i];
+        testSet1[i] = d;
+        testSet1[DATA_SIZE-1-i] = t;
+    }
+
+    clock_t end2 = clock();
+
+    clock_t cost1 = end-begin;
+    clock_t cost2 = end2-end;
+
+    __android_log_print(ANDROID_LOG_DEBUG, "NEON", "last number is %d, acc=%.1fx", testSet1[DATA_SIZE-1], 1.f*cost2/cost1);
 
     free(testSet1);
+
+    jclass clasz = env->FindClass("com/tencent/helloneon/BenchListener");
+    jmethodID method = env->GetMethodID(clasz, "onResult", "(Ljava/lang/String;)V");
+
+    std::stringstream out;
+    out << "benchResult:" << 1.f*cost2/cost1;
+    env->CallVoidMethod(jObj, method, env->NewStringUTF(out.str().c_str()));
 }
 
 static JNINativeMethod gMethods[] = {
-        {"makeTest",       "()V",            (void *)test}
+        {"makeTest",       "(Lcom/tencent/helloneon/BenchListener;)V",            (void *)test}
 };
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -54,11 +80,4 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     bail:
     return result;
-}
-
-JNIEXPORT void JNICALL
-Java_com_tencent_helloneon_MainActivity_makeTest__(JNIEnv *env, jclass type) {
-
-    test();
-
 }
