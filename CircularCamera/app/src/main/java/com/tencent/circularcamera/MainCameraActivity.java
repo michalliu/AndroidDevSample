@@ -27,8 +27,8 @@ public class MainCameraActivity extends AppCompatActivity {
     private void initViewParams(){
         ViewGroup.LayoutParams params = glSurfaceView.getLayoutParams();
         Point p = DisplayUtil.getScreenMetrics(this);
-        params.width = 200;
-        params.height = 200;
+        params.width = 500;
+        params.height = 500;
         previewRate = DisplayUtil.getScreenRate(this);
         glSurfaceView.setLayoutParams(params);
         ViewGroup.LayoutParams p2 = shutterBtn.getLayoutParams();

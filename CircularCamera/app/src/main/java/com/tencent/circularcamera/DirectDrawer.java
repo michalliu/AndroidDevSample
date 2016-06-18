@@ -14,28 +14,30 @@ public class DirectDrawer {
     private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
                     "attribute vec2 inputTextureCoordinate;" +
-                    "varying vec2 textureCoordinate;" +
+                    "varying vec2 texCoord;" +
                     "void main()" +
                     "{"+
                     "gl_Position = vPosition;"+
-                    "textureCoordinate = inputTextureCoordinate;" +
+                    "texCoord = inputTextureCoordinate;" +
                     "}";
 
     private final String fragmentShaderCode =
-            "//#version es 2.0\n" +
             "#extension GL_OES_EGL_image_external : require\n"+
-                    "precision mediump float;" +
-                    "varying vec2 textureCoordinate;\n" +
-                    "uniform samplerExternalOES s_texture;\n" +
-                    "void main() {\n" +
-                    "float x = textureCoordinate.x-0.5;\n"+
-                    "float y = textureCoordinate.y-0.5;\n" +
-                    "vec2 coord = textureCoordinate - vec2(0.5, 0.5);\n" +
-                    "if(length(coord)<0.5)\n" +
-                    "  gl_FragColor = texture2D( s_texture, textureCoordinate );\n" +
-                    "else\n"+
-                    "   discard;\n"+
-                    "}";
+            "precision mediump float;" +
+            "varying vec2 texCoord;\n" +
+            "uniform samplerExternalOES s_texture;\n" +
+            "void main() {\n" +
+            "vec2 coord = texCoord - vec2(0.5, 0.5);\n" +
+            "float factor=0.49;\n"+
+            "float scale = 1.0/(0.5-factor);\n"+
+            "float radius = length(coord);\n"+
+            "vec4 color = texture2D( s_texture, vec2(0.75*texCoord.x,texCoord.y) );\n"+
+            "float stepA = 1.0-step(0.5, radius);\n"+
+            "float stepB = 1.0-step(factor, radius);\n"+
+            "vec4 innerColor = stepB * color;\n"+
+            "vec4 midColor = (stepA-stepB) * (1.0-(radius-factor) * scale) * color;\n"+
+            "gl_FragColor = innerColor + midColor;\n" +
+            "}";
 
     private FloatBuffer vertexBuffer, textureVerticesBuffer;
     private ShortBuffer drawListBuffer;
