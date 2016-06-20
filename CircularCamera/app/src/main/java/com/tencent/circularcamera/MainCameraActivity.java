@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
 import com.tencent.circularcamera.util.DisplayUtil;
@@ -17,8 +19,8 @@ public class MainCameraActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_camera);
 
+        setContentView(R.layout.activity_main_camera);
         glSurfaceView = (CircularCameraSurfaceView)findViewById(R.id.camera_textureview);
         shutterBtn = (ImageButton)findViewById(R.id.btn_shutter);
         initViewParams();
